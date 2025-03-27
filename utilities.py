@@ -1,7 +1,7 @@
-import settings
+from settings import WIDTH, HEIGHT
 
 def height_prct(percentage):
-    return (settings.HEIGHT / 100) * percentage
+    return int((HEIGHT * percentage) / 100)
 
 def width_prct(percentage):
-    return (settings.WIDTH / 100) * percentage
+    return int((WIDTH * percentage) / 100)
