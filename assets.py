@@ -49,3 +49,19 @@ class ClassicAssets(Assets):
             'game_over': 'assets/sound/classic/Game_Over.mp3',
             'victory': 'assets/sound/classic/Victory.mp3'
         })
+
+class HomemadeAssets(Assets):
+    def __init__(self):
+        super().__init__()
+        pygame.mixer.init()  # Initialize pygame mixer
+
+        # Load audio files
+        self.load_audio({
+            'click': 'assets/sound/homemade/Click.mp3',
+            'flag': 'assets/sound/homemade/Flag.mp3',
+            'mine': 'assets/sound/homemade/Mine.mp3',
+            'hover': 'assets/sound/homemade/Hover.mp3',
+            'questionmark': 'assets/sound/homemade/Questionmark.mp3',
+            'game_over': 'assets/sound/homemade/Game_Over.mp3',
+            'victory': 'assets/sound/homemade/Victory.mp3'
+        })

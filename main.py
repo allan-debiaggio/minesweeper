@@ -3,11 +3,22 @@ from cell import Cell
 import settings
 import utilities
 import pygame
-from assets import ClassicAssets
+from assets import ClassicAssets, HomemadeAssets
 
 # Initialize assets
-classic_assets = ClassicAssets()  # Initialize ClassicAssets
-Cell.assets = classic_assets  # Pass assets to the Cell class
+classic_assets = ClassicAssets()
+homemade_assets = HomemadeAssets()
+Cell.assets = classic_assets  # Start with ClassicAssets
+
+# Function to toggle assets
+def toggle_assets():
+    global Cell
+    if toggle_btn['text'] == "Homemade":
+        toggle_btn['text'] = "Classic"
+        Cell.assets = homemade_assets  # Switch to HomemadeAssets
+    else:
+        toggle_btn['text'] = "Homemade"
+        Cell.assets = classic_assets  # Switch to ClassicAssets
 
 def restart_game():
     # Clear existing grid
@@ -59,7 +70,7 @@ def change_difficulty(level):
     restart_game()  # Restart the game, which resets first_click
 
 def play_hover_sound(event):
-    classic_assets.play_audio('hover')
+    Cell.assets.play_audio('hover')
 
 root = Tk()
 
@@ -90,6 +101,23 @@ game_title.place(
     x=utilities.width_prct(25),
     y=0
 )
+
+# Add the toggle button to the left of the title
+toggle_btn = Button(
+    top_frame,
+    text="Homemade",
+    width=10,
+    bg="blue",
+    fg="white",
+    command=toggle_assets
+)
+toggle_btn.place(
+    x=utilities.width_prct(5),
+    y=utilities.height_prct(5)
+)
+
+# Bind hover sound to the toggle button
+toggle_btn.bind("<Enter>", play_hover_sound)
 
 # Create difficulty buttons frame
 difficulty_frame = Frame(
