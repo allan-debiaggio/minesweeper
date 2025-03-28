@@ -141,7 +141,6 @@ class Cell:
         Cell.assets.play_audio('game_over')  # Play game over sound
         self.cell_btn_object.configure(bg="red")
         ctypes.windll.user32.MessageBoxW(0, "You clicked on a mine!", "Game Over!", 0)
-        sys.exit()
 
     def right_click_actions(self, event):
         if not self.is_flagged:
