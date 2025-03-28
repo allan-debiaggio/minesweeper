@@ -4,12 +4,13 @@ import random
 import settings
 import ctypes
 import sys
+import pygame
 
 class Cell:
     all = []
     cell_count = settings.CELL_COUNT
     cell_count_label_object = None
-    first_click = True  # Track if it's the first click
+    first_click = True
     images = {
         'numbers': [],
         'mine': None,
@@ -18,6 +19,7 @@ class Cell:
         'empty': None,
         'default': None
     }
+    assets = None  # Reference to the assets instance
 
     def __init__(self, x, y, is_mine=False):
         self.is_mine = is_mine
@@ -28,7 +30,6 @@ class Cell:
         self.x = x
         self.y = y
 
-        # Append the object to the Cell.all list
         Cell.all.append(self)
 
     def create_btn_object(self, location):
@@ -39,7 +40,7 @@ class Cell:
             activebackground='black',
             bd=0,
             highlightthickness=0,
-            borderwidth=0,   
+            borderwidth=0,
         )
         btn.bind('<Button-1>', self.left_click_actions)
         btn.bind('<Button-3>', self.right_click_actions)
@@ -58,25 +59,25 @@ class Cell:
 
     def left_click_actions(self, event):
         if Cell.first_click:
-            # Randomize mines, excluding the first clicked cell
             Cell.randomize_mines(exclude_cell=self)
-            Cell.first_click = False  # Set first_click to False after the first click
+            Cell.first_click = False
 
         if self.is_mine:
+            Cell.assets.play_audio('mine')  # Play mine sound
             self.show_mine()
         else:
+            Cell.assets.play_audio('click')  # Play click sound
             if self.surrounded_cells_mines_length == 0:
                 for cell_obj in self.surrounded_cells:
                     cell_obj.show_cell()
             self.show_cell()
 
-            # If mines count == remaining cells count, player won
             if Cell.cell_count == settings.MINES_COUNT:
+                Cell.assets.play_audio('victory')  # Play victory sound
                 ctypes.windll.user32.MessageBoxW(
                     0, "You win the game!", "Game Over!", 0
                 )
 
-        # Cancel left and right click actions if cell is already open
         self.cell_btn_object.unbind("<Button-1>")
         self.cell_btn_object.unbind("<Button-3>")
 
@@ -137,26 +138,22 @@ class Cell:
         self.is_opened = True
 
     def show_mine(self):
-        # Logic to interrupt the game and display a message that player lost
+        Cell.assets.play_audio('game_over')  # Play game over sound
         self.cell_btn_object.configure(bg="red")
         ctypes.windll.user32.MessageBoxW(0, "You clicked on a mine!", "Game Over!", 0)
         sys.exit()
 
     def right_click_actions(self, event):
         if not self.is_flagged:
-            self.cell_btn_object.configure(
-                image=Cell.images['flag']
-            )
+            self.cell_btn_object.configure(image=Cell.images['flag'])
             self.is_flagged = True
+            Cell.assets.play_audio('flag')  # Play flag sound
         elif not self.is_questionmark:
-            self.cell_btn_object.configure(
-                image=Cell.images['question']
-            )
+            self.cell_btn_object.configure(image=Cell.images['question'])
             self.is_questionmark = True
+            Cell.assets.play_audio('questionmark')  # Play questionmark sound
         else:
-            self.cell_btn_object.configure(
-                image=Cell.images['default']
-            )
+            self.cell_btn_object.configure(image=Cell.images['default'])
             self.is_flagged = False
             self.is_questionmark = False
 

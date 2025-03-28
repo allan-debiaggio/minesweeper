@@ -2,7 +2,12 @@ from tkinter import *
 from cell import Cell
 import settings
 import utilities
+import pygame
+from assets import ClassicAssets
 
+# Initialize assets
+classic_assets = ClassicAssets()  # Initialize ClassicAssets
+Cell.assets = classic_assets  # Pass assets to the Cell class
 
 def restart_game():
     # Clear existing grid
@@ -52,6 +57,9 @@ def change_difficulty(level):
     }
     Cell.load_images()
     restart_game()  # Restart the game, which resets first_click
+
+def play_hover_sound(event):
+    classic_assets.play_audio('hover')
 
 root = Tk()
 
@@ -123,6 +131,11 @@ hard_btn = Button(
     command=lambda: change_difficulty('hard')
 )
 hard_btn.grid(row=0, column=2, padx=5)
+
+# Bind hover events to difficulty buttons
+easy_btn.bind("<Enter>", play_hover_sound)
+medium_btn.bind("<Enter>", play_hover_sound)
+hard_btn.bind("<Enter>", play_hover_sound)
 
 left_frame = Frame(
     root,
