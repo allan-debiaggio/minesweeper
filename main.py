@@ -10,12 +10,13 @@ def restart_game():
         widget.destroy()
     Cell.all = []
     Cell.cell_count = settings.CELL_COUNT
-    
+    Cell.first_click = True  # Reset first_click to True
+
     # Configure grid without spacing
     for i in range(settings.GRID_SIZE):
         center_frame.grid_columnconfigure(i, weight=1, uniform="cells", pad=0)
         center_frame.grid_rowconfigure(i, weight=1, uniform="cells", pad=0)
-    
+
     # Recreate grid
     for x in range(settings.GRID_SIZE):
         for y in range(settings.GRID_SIZE):
@@ -31,14 +32,15 @@ def restart_game():
                 sticky='nsew'
             )
     Cell.create_cell_count_label(left_frame)
-    Cell.randomize_mines()
+    # Remove this line to prevent premature mine placement
+    # Cell.randomize_mines()
 
 def change_difficulty(level):
     settings.current_difficulty = level
     settings.GRID_SIZE = settings.DIFFICULTY[level]['GRID_SIZE']
     settings.MINES_COUNT = settings.DIFFICULTY[level]['MINES_COUNT']
     settings.CELL_COUNT = settings.GRID_SIZE ** 2
-    
+
     # Reset images with new size
     Cell.images = {
         'numbers': [],
@@ -49,7 +51,7 @@ def change_difficulty(level):
         'default': None
     }
     Cell.load_images()
-    restart_game()
+    restart_game()  # Restart the game, which resets first_click
 
 root = Tk()
 
@@ -169,7 +171,7 @@ Cell.create_cell_count_label(left_frame)
 Cell.cell_count_label_object.place(x=0, y=0)
 
 # Initialize mines
-Cell.randomize_mines()
+# Cell.randomize_mines()
 
 # Run the window
 root.mainloop()

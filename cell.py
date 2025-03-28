@@ -9,6 +9,7 @@ class Cell:
     all = []
     cell_count = settings.CELL_COUNT
     cell_count_label_object = None
+    first_click = True  # Track if it's the first click
     images = {
         'numbers': [],
         'mine': None,
@@ -56,6 +57,11 @@ class Cell:
         Cell.cell_count_label_object = lbl
 
     def left_click_actions(self, event):
+        if Cell.first_click:
+            # Randomize mines, excluding the first clicked cell
+            Cell.randomize_mines(exclude_cell=self)
+            Cell.first_click = False  # Set first_click to False after the first click
+
         if self.is_mine:
             self.show_mine()
         else:
@@ -67,7 +73,8 @@ class Cell:
             # If mines count == remaining cells count, player won
             if Cell.cell_count == settings.MINES_COUNT:
                 ctypes.windll.user32.MessageBoxW(
-                    0, "You win the game!", "Game Over!", 0)
+                    0, "You win the game!", "Game Over!", 0
+                )
 
         # Cancel left and right click actions if cell is already open
         self.cell_btn_object.unbind("<Button-1>")
@@ -154,10 +161,19 @@ class Cell:
             self.is_questionmark = False
 
     @staticmethod
-    def randomize_mines():
-        picked_cells = random.sample(
-            Cell.all, settings.MINES_COUNT
-        )
+    def randomize_mines(exclude_cell=None):
+        if exclude_cell:
+            # Exclude the first clicked cell and its neighbors
+            available_cells = [
+                cell for cell in Cell.all
+                if cell != exclude_cell and cell not in exclude_cell.surrounded_cells
+            ]
+        else:
+            # If no exclude_cell is provided, use all cells
+            available_cells = Cell.all
+
+        # Randomly select cells to be mines
+        picked_cells = random.sample(available_cells, settings.MINES_COUNT)
         for picked_cell in picked_cells:
             picked_cell.is_mine = True
 
