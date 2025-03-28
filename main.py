@@ -3,6 +3,7 @@ from cell import Cell
 import settings
 import utilities
 import pygame
+import ctypes
 from assets import ClassicAssets, HomemadeAssets
 
 # Initialize assets
@@ -71,6 +72,12 @@ def change_difficulty(level):
 
 def play_hover_sound(event):
     Cell.assets.play_audio('hover')
+
+# Function to simulate a win
+def simulate_win():
+    Cell.cell_count = settings.MINES_COUNT  # Set remaining cells to match mine count
+    Cell.assets.play_audio('victory')  # Play victory sound
+    ctypes.windll.user32.MessageBoxW(0, "You win the game!", "Game Over!", 0)
 
 root = Tk()
 
@@ -159,6 +166,17 @@ hard_btn = Button(
     command=lambda: change_difficulty('hard')
 )
 hard_btn.grid(row=0, column=2, padx=5)
+
+# Add the "Win" button for testing purposes
+win_btn = Button(
+    difficulty_frame,
+    text="Win",
+    width=10,
+    bg="purple",
+    fg="white",
+    command=simulate_win
+)
+win_btn.grid(row=1, column=0, padx=5, pady=5)  # Place below the "Easy" button
 
 # Bind hover events to difficulty buttons
 easy_btn.bind("<Enter>", play_hover_sound)
