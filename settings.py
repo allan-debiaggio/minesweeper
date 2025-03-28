@@ -18,6 +18,7 @@ DIFFICULTY = {
     }
 }
 
+
 # Niveau par défaut
 current_difficulty = 'easy'
 GRID_SIZE = DIFFICULTY[current_difficulty]['GRID_SIZE']

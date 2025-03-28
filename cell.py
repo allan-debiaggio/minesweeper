@@ -33,12 +33,12 @@ class Cell:
     def create_btn_object(self, location):
         btn = Button(
             location,
-            width=30,
-            height=30,
             image=Cell.images['default'],
             bg='black',
             activebackground='black',
             bd=0,
+            highlightthickness=0,
+            borderwidth=0,   
         )
         btn.bind('<Button-1>', self.left_click_actions)
         btn.bind('<Button-3>', self.right_click_actions)
@@ -67,7 +67,7 @@ class Cell:
             # If mines count == remaining cells count, player won
             if Cell.cell_count == settings.MINES_COUNT:
                 ctypes.windll.user32.MessageBoxW(
-                    0, "You won the game!", "Game Over!", 0)
+                    0, "You win the game!", "Game Over!", 0)
 
         # Cancel left and right click actions if cell is already open
         self.cell_btn_object.unbind("<Button-1>")
@@ -163,7 +163,10 @@ class Cell:
 
     @staticmethod
     def load_images():
-        cell_size = 30  # Default size
+        if settings.current_difficulty == "hard":
+            cell_size = 20
+        else:
+            cell_size = 30  # Default size
         
         # Load number images (1-8)
         for i in range(1, 9):

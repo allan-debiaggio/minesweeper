@@ -26,6 +26,8 @@ def restart_game():
                 row=y,
                 padx=0,
                 pady=0,
+                ipady=0,
+                ipadx=0,  
                 sticky='nsew'
             )
     Cell.create_cell_count_label(left_frame)
@@ -132,8 +134,10 @@ center_frame = Frame(
     root,
     bg="black",  # Change color to see the frame
     width=utilities.width_prct(75),
-    height=utilities.height_prct(75)
+    height=utilities.height_prct(75),
+
 )
+
 center_frame.place(
     x=utilities.width_prct(25),
     y=utilities.height_prct(25)
