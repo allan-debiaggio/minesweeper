@@ -8,6 +8,7 @@ class Cell :
     all = []
     cell_count = settings.CELL_COUNT
     cell_count_label_object = None
+    first_click = True
     def __init__(self, x, y, is_mine = False):
         self.is_mine = is_mine
         self.is_opened = False
@@ -41,21 +42,27 @@ class Cell :
         )
         Cell.cell_count_label_object = lbl
 
-    def left_click_actions(self, event) :
-        if self.is_mine :
+    def left_click_actions(self, event):
+        if Cell.first_click:
+            # Ensure the first clicked cell and its neighbors are not mines
+            Cell.randomize_mines(exclude_cell=self)
+            Cell.first_click = False  # Set first_click to False after the first click
+
+        if self.is_mine:
             self.show_mine()
-        else :
-            if self.surrounded_cells_mines_length == 0 :
-                for cell_obj in self.surrounded_cells :
+        else:
+            if self.surrounded_cells_mines_length == 0:
+                for cell_obj in self.surrounded_cells:
                     cell_obj.show_cell()
             self.show_cell()
 
             # If mines count == remaining cells count, player won
-            if Cell.cell_count == settings.MINES_COUNT :
+            if Cell.cell_count == settings.MINES_COUNT:
                 ctypes.windll.user32.MessageBoxW(
-                    0, "You won the game !", "Game Over !", 0)
+                    0, "You won the game!", "Game Over!", 0
+                )
 
-        # Cancel left and right click actions if cell is already open :
+        # Cancel left and right click actions if cell is already open:
         self.cell_btn_object.unbind("<Button-1>")
         self.cell_btn_object.unbind("<Button-3>")
 
@@ -132,11 +139,14 @@ class Cell :
             self.is_questionmark = False
     
     @staticmethod
-    def randomize_mines():
-        picked_cells = random.sample(
-            Cell.all, settings.MINES_COUNT
-        )
-        for picked_cell in picked_cells :
+    def randomize_mines(exclude_cell=None):
+        # Get all cells except the excluded cell and its neighbors
+        available_cells = [
+            cell for cell in Cell.all
+            if cell != exclude_cell and cell not in exclude_cell.surrounded_cells
+        ]
+        picked_cells = random.sample(available_cells, settings.MINES_COUNT)
+        for picked_cell in picked_cells:
             picked_cell.is_mine = True
 
 

@@ -63,7 +63,7 @@ for x in range(settings.GRID_SIZE) :
 Cell.create_cell_count_label(left_frame)
 Cell.cell_count_label_object.place(x = 0, y = 0)
 
-Cell.randomize_mines()
+# Cell.randomize_mines()
 
 # Run the window
 root.mainloop()
