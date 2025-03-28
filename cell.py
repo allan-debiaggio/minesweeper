@@ -48,14 +48,20 @@ class Cell:
 
     @staticmethod
     def create_cell_count_label(location):
-        lbl = Label(
+        """
+        Create a label to display the number of remaining clickable cells.
+        """
+        if Cell.cell_count_label_object:
+            Cell.cell_count_label_object.destroy()  # Remove the old label if it exists
+
+        Cell.cell_count_label_object = Label(
             location,
             bg="black",
             fg="white",
-            text=f"Cells Left:{Cell.cell_count}",
-            font=("", 20)
+            text=f"Cells Left: {Cell.cell_count - settings.MINES_COUNT}",
+            font=("", 16)
         )
-        Cell.cell_count_label_object = lbl
+        Cell.cell_count_label_object.place(x=0, y=0)
 
     def left_click_actions(self, event):
         if Cell.first_click:
@@ -113,29 +119,22 @@ class Cell:
 
     def show_cell(self):
         if not self.is_opened:
-            Cell.cell_count -= 1
+            self.is_opened = True
+            Cell.cell_count -= 1  # Decrement the cell count
+            if Cell.cell_count_label_object:
+                Cell.cell_count_label_object.config(
+                    text=f"Cells Left: {Cell.cell_count - settings.MINES_COUNT}"
+                )
+
+            # Update the button appearance
             if self.surrounded_cells_mines_length > 0:
                 self.cell_btn_object.configure(
-                    image=Cell.images['numbers'][self.surrounded_cells_mines_length - 1],
-                    bg='black',
-                    activebackground='black',
-                    bd=0,
-                    relief='flat',
-                    highlightthickness=0
+                    image=Cell.images['numbers'][self.surrounded_cells_mines_length - 1]
                 )
             else:
                 self.cell_btn_object.configure(
-                    image=Cell.images['empty'],
-                    bg='black',
-                    activebackground='black',
-                    bd=0,
-                    relief='flat',
-                    highlightthickness=0
+                    image=Cell.images['empty']
                 )
-            if Cell.cell_count_label_object:
-                Cell.cell_count_label_object.configure(
-                    text=f"Cells Left:{Cell.cell_count}")
-        self.is_opened = True
 
     def show_mine(self):
         Cell.assets.play_audio('game_over')  # Play game over sound

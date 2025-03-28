@@ -48,9 +48,9 @@ def restart_game():
                 ipadx=0,  
                 sticky='nsew'
             )
+
+    # Reset the cell count label
     Cell.create_cell_count_label(left_frame)
-    # Remove this line to prevent premature mine placement
-    # Cell.randomize_mines()
 
 def change_difficulty(level):
     settings.current_difficulty = level
@@ -68,7 +68,7 @@ def change_difficulty(level):
         'default': None
     }
     Cell.load_images()
-    restart_game()  # Restart the game, which resets first_click
+    restart_game()  # Restart the game, which resets first_click and the cell count label
 
 def play_hover_sound(event):
     Cell.assets.play_audio('hover')
