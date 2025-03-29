@@ -18,7 +18,7 @@ def toggle_assets():
         toggle_btn['text'] = "Classic"
         Cell.assets = homemade_assets  # Switch to HomemadeAssets
     else:
-        toggle_btn['text'] = "Homemade"
+        toggle_btn['text'] == "Homemade"
         Cell.assets = classic_assets  # Switch to ClassicAssets
 
 def restart_game():
@@ -28,6 +28,7 @@ def restart_game():
     Cell.all = []
     Cell.cell_count = settings.CELL_COUNT
     Cell.first_click = True  # Reset first_click to True
+    Cell.game_over = False  # Reset game_over to False
 
     # Configure grid without spacing
     for i in range(settings.GRID_SIZE):

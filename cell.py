@@ -11,6 +11,7 @@ class Cell:
     cell_count = settings.CELL_COUNT
     cell_count_label_object = None
     first_click = True
+    game_over = False  # Track whether the game has ended
     images = {
         'numbers': [],
         'mine': None,
@@ -64,6 +65,9 @@ class Cell:
         Cell.cell_count_label_object.place(x=0, y=0)
 
     def left_click_actions(self, event):
+        if Cell.game_over:  # Prevent interactions if the game is over
+            return
+
         if Cell.first_click:
             Cell.randomize_mines(exclude_cell=self)
             Cell.first_click = False
@@ -71,6 +75,7 @@ class Cell:
         if self.is_mine:
             Cell.assets.play_audio('mine')  # Play mine sound
             self.show_mine()
+            Cell.game_over = True  # Set game_over to True
         else:
             Cell.assets.play_audio('click')  # Play click sound
             if self.surrounded_cells_mines_length == 0:
@@ -83,6 +88,7 @@ class Cell:
                 ctypes.windll.user32.MessageBoxW(
                     0, "You win the game!", "Game Over!", 0
                 )
+                Cell.game_over = True  # Set game_over to True
 
         self.cell_btn_object.unbind("<Button-1>")
         self.cell_btn_object.unbind("<Button-3>")
@@ -142,6 +148,9 @@ class Cell:
         ctypes.windll.user32.MessageBoxW(0, "You clicked on a mine!", "Game Over!", 0)
 
     def right_click_actions(self, event):
+        if Cell.game_over:  # Prevent interactions if the game is over
+            return
+
         if not self.is_flagged:
             self.cell_btn_object.configure(image=Cell.images['flag'])
             self.is_flagged = True
