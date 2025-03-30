@@ -148,7 +148,7 @@ class Cell:
         ctypes.windll.user32.MessageBoxW(0, "You clicked on a mine!", "Game Over!", 0)
 
     def right_click_actions(self, event):
-        if Cell.game_over:  # Prevent interactions if the game is over
+        if Cell.game_over or self.is_opened:  # Prevent interactions if the game is over or cell is opened
             return
 
         if not self.is_flagged:

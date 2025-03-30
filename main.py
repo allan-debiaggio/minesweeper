@@ -6,232 +6,117 @@ import pygame
 import ctypes
 from assets import ClassicAssets, HomemadeAssets
 
-# Initialize assets
-classic_assets = ClassicAssets()
-homemade_assets = HomemadeAssets()
-Cell.assets = classic_assets  # Start with ClassicAssets
+class Game:
+    def __init__(self):
+        self.root = Tk()
+        self.classic_assets = ClassicAssets()
+        self.homemade_assets = HomemadeAssets()
+        self.current_assets = self.classic_assets  # Start with ClassicAssets
+        Cell.assets = self.current_assets
 
-# Function to toggle assets
-def toggle_assets():
-    global Cell
-    if toggle_btn['text'] == "Homemade":
-        toggle_btn['text'] = "Classic"
-        Cell.assets = homemade_assets  # Switch to HomemadeAssets
-    else:
-        toggle_btn['text'] == "Homemade"
-        Cell.assets = classic_assets  # Switch to ClassicAssets
+        self.setup_window()
+        self.create_frames()
+        self.create_widgets()
+        self.configure_grid()
+        Cell.load_images()
+        self.create_cells()
+        Cell.create_cell_count_label(self.left_frame)
 
-def restart_game():
-    # Clear existing grid
-    for widget in center_frame.winfo_children():
-        widget.destroy()
-    Cell.all = []
-    Cell.cell_count = settings.CELL_COUNT
-    Cell.first_click = True  # Reset first_click to True
-    Cell.game_over = False  # Reset game_over to False
+    def setup_window(self):
+        self.root.configure(bg="Black")
+        self.root.geometry(f"{settings.WIDTH}x{settings.HEIGHT}")
+        self.root.title("Minesweeper")
+        self.root.resizable(False, False)
 
-    # Configure grid without spacing
-    for i in range(settings.GRID_SIZE):
-        center_frame.grid_columnconfigure(i, weight=1, uniform="cells", pad=0)
-        center_frame.grid_rowconfigure(i, weight=1, uniform="cells", pad=0)
+    def create_frames(self):
+        self.top_frame = Frame(self.root, bg="black", width=settings.WIDTH, height=utilities.height_prct(25))
+        self.top_frame.place(x=0, y=0)
 
-    # Recreate grid
-    for x in range(settings.GRID_SIZE):
-        for y in range(settings.GRID_SIZE):
-            c = Cell(x, y)
-            c.create_btn_object(center_frame)
-            c.cell_btn_object.grid(
-                column=x,
-                row=y,
-                padx=0,
-                pady=0,
-                ipady=0,
-                ipadx=0,  
-                sticky='nsew'
-            )
+        self.left_frame = Frame(self.root, bg="black", width=utilities.width_prct(25), height=utilities.height_prct(75))
+        self.left_frame.place(x=0, y=utilities.height_prct(25))
 
-    # Reset the cell count label
-    Cell.create_cell_count_label(left_frame)
+        self.center_frame = Frame(self.root, bg="black", width=utilities.width_prct(75), height=utilities.height_prct(75))
+        self.center_frame.place(x=utilities.width_prct(25), y=utilities.height_prct(25))
 
-def change_difficulty(level):
-    settings.current_difficulty = level
-    settings.GRID_SIZE = settings.DIFFICULTY[level]['GRID_SIZE']
-    settings.MINES_COUNT = settings.DIFFICULTY[level]['MINES_COUNT']
-    settings.CELL_COUNT = settings.GRID_SIZE ** 2
+    def create_widgets(self):
+        game_title = Label(self.top_frame, bg="black", fg="white", text="Minesweeper", font=("", 42))
+        game_title.place(x=utilities.width_prct(25), y=0)
 
-    # Reset images with new size
-    Cell.images = {
-        'numbers': [],
-        'mine': None,
-        'flag': None,
-        'question': None,
-        'empty': None,
-        'default': None
-    }
-    Cell.load_images()
-    restart_game()  # Restart the game, which resets first_click and the cell count label
+        self.toggle_btn = Button(self.top_frame, text="Homemade", width=10, bg="blue", fg="white", command=self.toggle_assets)
+        self.toggle_btn.place(x=utilities.width_prct(5), y=utilities.height_prct(5))
+        self.toggle_btn.bind("<Enter>", self.play_hover_sound)
 
-def play_hover_sound(event):
-    Cell.assets.play_audio('hover')
+        difficulty_frame = Frame(self.top_frame, bg="black")
+        difficulty_frame.place(x=utilities.width_prct(60), y=utilities.height_prct(5))
 
-# Function to simulate a win
-def simulate_win():
-    Cell.cell_count = settings.MINES_COUNT  # Set remaining cells to match mine count
-    Cell.assets.play_audio('victory')  # Play victory sound
-    ctypes.windll.user32.MessageBoxW(0, "You win the game!", "Game Over!", 0)
+        easy_btn = Button(difficulty_frame, text="Easy", width=10, bg="green", fg="white", command=lambda: self.change_difficulty('easy'))
+        easy_btn.grid(row=0, column=0, padx=5)
+        easy_btn.bind("<Enter>", self.play_hover_sound)  # Bind hover sound
 
-root = Tk()
+        medium_btn = Button(difficulty_frame, text="Medium", width=10, bg="orange", fg="white", command=lambda: self.change_difficulty('medium'))
+        medium_btn.grid(row=0, column=1, padx=5)
+        medium_btn.bind("<Enter>", self.play_hover_sound)  # Bind hover sound
 
-# Override the settings of the window
-root.configure(bg="Black")
-root.geometry(f"{settings.WIDTH}x{settings.HEIGHT}")
-root.title("Minesweeper")
-root.resizable(False, False)
+        hard_btn = Button(difficulty_frame, text="Hard", width=10, bg="red", fg="white", command=lambda: self.change_difficulty('hard'))
+        hard_btn.grid(row=0, column=2, padx=5)
+        hard_btn.bind("<Enter>", self.play_hover_sound)  # Bind hover sound
 
-# Create frames
-top_frame = Frame(
-    root,
-    bg="black",
-    width=settings.WIDTH,
-    height=utilities.height_prct(25)
-)
-top_frame.place(x=0, y=0)
+        win_btn = Button(difficulty_frame, text="Win", width=10, bg="purple", fg="white", command=self.simulate_win)
+        win_btn.grid(row=1, column=0, padx=5, pady=5)
+        win_btn.bind("<Enter>", self.play_hover_sound)  # Bind hover sound
 
-game_title = Label(
-    top_frame,
-    bg="black",
-    fg="white",
-    text="Minesweeper",
-    font=("", 42)
-)
+    def configure_grid(self):
+        for i in range(settings.GRID_SIZE):
+            self.center_frame.grid_columnconfigure(i, weight=1, uniform="cells", pad=0)
+            self.center_frame.grid_rowconfigure(i, weight=1, uniform="cells", pad=0)
 
-game_title.place(
-    x=utilities.width_prct(25),
-    y=0
-)
+    def create_cells(self):
+        for x in range(settings.GRID_SIZE):
+            for y in range(settings.GRID_SIZE):
+                c = Cell(x, y)
+                c.create_btn_object(self.center_frame)
+                c.cell_btn_object.grid(column=x, row=y, padx=0, pady=0, sticky='nsew')
 
-# Add the toggle button to the left of the title
-toggle_btn = Button(
-    top_frame,
-    text="Homemade",
-    width=10,
-    bg="blue",
-    fg="white",
-    command=toggle_assets
-)
-toggle_btn.place(
-    x=utilities.width_prct(5),
-    y=utilities.height_prct(5)
-)
+    def toggle_assets(self):
+        if self.toggle_btn['text'] == "Homemade":
+            self.toggle_btn['text'] = "Classic"
+            self.current_assets = self.homemade_assets
+        else:
+            self.toggle_btn['text'] = "Homemade"
+            self.current_assets = self.classic_assets
+        Cell.assets = self.current_assets
 
-# Bind hover sound to the toggle button
-toggle_btn.bind("<Enter>", play_hover_sound)
+    def restart_game(self):
+        for widget in self.center_frame.winfo_children():
+            widget.destroy()
+        Cell.all = []
+        Cell.cell_count = settings.CELL_COUNT
+        Cell.first_click = True
+        Cell.game_over = False
+        self.configure_grid()
+        self.create_cells()
+        Cell.create_cell_count_label(self.left_frame)
 
-# Create difficulty buttons frame
-difficulty_frame = Frame(
-    top_frame,
-    bg="black"
-)
-difficulty_frame.place(
-    x=utilities.width_prct(60),
-    y=utilities.height_prct(5)
-)
+    def change_difficulty(self, level):
+        settings.current_difficulty = level
+        settings.GRID_SIZE = settings.DIFFICULTY[level]['GRID_SIZE']
+        settings.MINES_COUNT = settings.DIFFICULTY[level]['MINES_COUNT']
+        settings.CELL_COUNT = settings.GRID_SIZE ** 2
+        Cell.images = {'numbers': [], 'mine': None, 'flag': None, 'question': None, 'empty': None, 'default': None}
+        Cell.load_images()
+        self.restart_game()
 
-# Difficulty buttons
-easy_btn = Button(
-    difficulty_frame,
-    text="Easy",
-    width=10,
-    bg="green",
-    fg="white",
-    command=lambda: change_difficulty('easy')
-)
-easy_btn.grid(row=0, column=0, padx=5)
+    def play_hover_sound(self, event):
+        self.current_assets.play_audio('hover')  # Use the hover sound from assets
 
-medium_btn = Button(
-    difficulty_frame,
-    text="Medium",
-    width=10,
-    bg="orange",
-    fg="white",
-    command=lambda: change_difficulty('medium')
-)
-medium_btn.grid(row=0, column=1, padx=5)
+    def simulate_win(self):
+        Cell.cell_count = settings.MINES_COUNT
+        Cell.assets.play_audio('victory')
+        ctypes.windll.user32.MessageBoxW(0, "You win the game!", "Game Over!", 0)
 
-hard_btn = Button(
-    difficulty_frame,
-    text="Hard",
-    width=10,
-    bg="red",
-    fg="white",
-    command=lambda: change_difficulty('hard')
-)
-hard_btn.grid(row=0, column=2, padx=5)
+    def run(self):
+        self.root.mainloop()
 
-# Add the "Win" button for testing purposes
-win_btn = Button(
-    difficulty_frame,
-    text="Win",
-    width=10,
-    bg="purple",
-    fg="white",
-    command=simulate_win
-)
-win_btn.grid(row=1, column=0, padx=5, pady=5)  # Place below the "Easy" button
-
-# Bind hover events to difficulty buttons
-easy_btn.bind("<Enter>", play_hover_sound)
-medium_btn.bind("<Enter>", play_hover_sound)
-hard_btn.bind("<Enter>", play_hover_sound)
-
-left_frame = Frame(
-    root,
-    bg="black",  # Change color to see the frame
-    width=utilities.width_prct(25),
-    height=utilities.height_prct(75)
-)
-left_frame.place(x=0, y=utilities.height_prct(25))
-
-center_frame = Frame(
-    root,
-    bg="black",  # Change color to see the frame
-    width=utilities.width_prct(75),
-    height=utilities.height_prct(75),
-
-)
-
-center_frame.place(
-    x=utilities.width_prct(25),
-    y=utilities.height_prct(25)
-)
-
-# Configure grid
-for i in range(settings.GRID_SIZE):
-    center_frame.grid_columnconfigure(i, weight=1, uniform="cells", pad=0)
-    center_frame.grid_rowconfigure(i, weight=1, uniform="cells", pad=0)
-
-# Load images
-Cell.load_images()
-
-# Create cells
-for x in range(settings.GRID_SIZE):
-    for y in range(settings.GRID_SIZE):
-        c = Cell(x, y)
-        c.create_btn_object(center_frame)
-        c.cell_btn_object.grid(
-            column=x,
-            row=y,
-            padx=0,
-            pady=0,
-            sticky='nsew'
-        )
-
-# Create cell count label
-Cell.create_cell_count_label(left_frame)
-Cell.cell_count_label_object.place(x=0, y=0)
-
-# Initialize mines
-# Cell.randomize_mines()
-
-# Run the window
-root.mainloop()
+if __name__ == "__main__":
+    game = Game()
+    game.run()
