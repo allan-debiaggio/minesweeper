@@ -14,6 +14,11 @@ class Game:
         self.current_assets = self.classic_assets  # Start with ClassicAssets
         Cell.assets = self.current_assets
 
+        self.timer_label = None
+        self.timer_running = False
+        self.timer_value = 0
+        self.timer_job = None
+
         self.setup_window()
         self.create_frames()
         self.create_widgets()
@@ -21,6 +26,7 @@ class Game:
         Cell.load_images()
         self.create_cells()
         Cell.create_cell_count_label(self.left_frame)
+        self.create_timer_label(self.left_frame)
 
     def setup_window(self):
         self.root.configure(bg="Black")
@@ -65,6 +71,58 @@ class Game:
         win_btn.grid(row=1, column=0, padx=5, pady=5)
         win_btn.bind("<Enter>", self.play_hover_sound)  # Bind hover sound
 
+    def create_timer_label(self, location):
+        """
+        Create a label to display the timer.
+        """
+        if self.timer_label:
+            self.timer_label.destroy()  # Remove the old timer label if it exists
+
+        self.timer_label = Label(
+            location,
+            bg="black",
+            fg="white",
+            text=f"Time: {self.timer_value}",
+            font=("", 16)
+        )
+        self.timer_label.place(x=0, y=30)
+
+    def start_timer(self):
+        """
+        Start the timer, incrementing every second.
+        """
+        if not self.timer_running:
+            self.timer_running = True
+            self.update_timer()
+
+    def update_timer(self):
+        """
+        Update the timer value and schedule the next increment.
+        """
+        if self.timer_running:
+            self.timer_value += 1
+            self.timer_label.config(text=f"Time: {self.timer_value}")
+            if self.timer_value < 999:  # Limit timer to 999
+                self.timer_job = self.root.after(1000, self.update_timer)
+
+    def stop_timer(self):
+        """
+        Stop the timer.
+        """
+        self.timer_running = False
+        if self.timer_job:
+            self.root.after_cancel(self.timer_job)
+            self.timer_job = None
+
+    def reset_timer(self):
+        """
+        Reset the timer to 0.
+        """
+        self.stop_timer()
+        self.timer_value = 0
+        if self.timer_label:
+            self.timer_label.config(text=f"Time: {self.timer_value}")
+
     def configure_grid(self):
         for i in range(settings.GRID_SIZE):
             self.center_frame.grid_columnconfigure(i, weight=1, uniform="cells", pad=0)
@@ -96,6 +154,7 @@ class Game:
         self.configure_grid()
         self.create_cells()
         Cell.create_cell_count_label(self.left_frame)
+        self.reset_timer()
 
     def change_difficulty(self, level):
         settings.current_difficulty = level
@@ -105,6 +164,7 @@ class Game:
         Cell.images = {'numbers': [], 'mine': None, 'flag': None, 'question': None, 'empty': None, 'default': None}
         Cell.load_images()
         self.restart_game()
+        self.reset_timer()
 
     def play_hover_sound(self, event):
         self.current_assets.play_audio('hover')  # Use the hover sound from assets
@@ -119,4 +179,5 @@ class Game:
 
 if __name__ == "__main__":
     game = Game()
+    Cell.game_instance = game  # Provide the game instance to the Cell class
     game.run()

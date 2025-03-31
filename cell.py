@@ -71,6 +71,7 @@ class Cell:
         if Cell.first_click:
             Cell.randomize_mines(exclude_cell=self)
             Cell.first_click = False
+            Cell.game_instance.start_timer()  # Start the timer on the first click
 
         if self.is_mine:
             Cell.assets.play_audio('mine')  # Play mine sound
