@@ -172,6 +172,7 @@ class Game:
     def simulate_win(self):
         Cell.cell_count = settings.MINES_COUNT
         Cell.assets.play_audio('victory')
+        self.stop_timer()  # Stop the timer when the user wins
         ctypes.windll.user32.MessageBoxW(0, "You win the game!", "Game Over!", 0)
 
     def run(self):
