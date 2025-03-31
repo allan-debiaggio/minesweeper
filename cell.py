@@ -77,6 +77,7 @@ class Cell:
             Cell.assets.play_audio('mine')  # Play mine sound
             self.show_mine()
             Cell.game_over = True  # Set game_over to True
+            Cell.game_instance.stop_timer()  # Stop the timer when the game is over
         else:
             Cell.assets.play_audio('click')  # Play click sound
             if self.surrounded_cells_mines_length == 0:
@@ -90,6 +91,7 @@ class Cell:
                     0, "You win the game!", "Game Over!", 0
                 )
                 Cell.game_over = True  # Set game_over to True
+                Cell.game_instance.stop_timer()  # Stop the timer when the game is over
 
         self.cell_btn_object.unbind("<Button-1>")
         self.cell_btn_object.unbind("<Button-3>")
